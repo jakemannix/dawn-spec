@@ -1,0 +1,95 @@
+syntax = "proto3";
+
+package dawn.acp;
+
+// Agent Connect Protocol (ACP) service definition
+// This service implements the direct agent-to-agent communication in the DAWN architecture
+service AgentConnectService {
+  // Get information about an agent's capabilities
+  rpc GetAgentInfo(GetAgentInfoRequest) returns (GetAgentInfoResponse);
+  
+  // Invoke a capability on an agent
+  rpc InvokeCapability(InvokeCapabilityRequest) returns (InvokeCapabilityResponse);
+  
+  // Check agent health status
+  rpc HealthCheck(HealthCheckRequest) returns (HealthCheckResponse);
+  
+  // Stream for bidirectional communication
+  rpc StreamInteraction(stream InteractionMessage) returns (stream InteractionMessage);
+}
+
+// Request for agent information
+message GetAgentInfoRequest {
+  string auth_token = 1;
+}
+
+// Agent information response
+message GetAgentInfoResponse {
+  string id = 1;
+  string name = 2;
+  string description = 3;
+  repeated Capability capabilities = 4;
+  map<string, string> metadata = 5;
+}
+
+// Capability information
+message Capability {
+  string id = 1;
+  string type = 2;
+  string name = 3;
+  string description = 4;
+  string version = 5;
+  map<string, string> parameters = 6;
+  map<string, string> metadata = 7;
+}
+
+// Request to invoke a capability
+message InvokeCapabilityRequest {
+  string capability_id = 1;
+  bytes inputs = 2;  // JSON serialized input parameters
+  bytes config = 3;  // JSON serialized configuration parameters
+  string auth_token = 4;
+}
+
+// Response from capability invocation
+message InvokeCapabilityResponse {
+  bytes result = 1;  // JSON serialized result
+  bool success = 2;
+  string error_message = 3;
+  InvocationMetadata metadata = 4;
+}
+
+// Metadata about a capability invocation
+message InvocationMetadata {
+  int64 start_time = 1;  // Unix timestamp in milliseconds
+  int64 end_time = 2;    // Unix timestamp in milliseconds
+  int32 input_tokens = 3;
+  int32 output_tokens = 4;
+  string model_used = 5;
+  map<string, string> additional_info = 6;
+}
+
+// Health check request
+message HealthCheckRequest {
+  string auth_token = 1;
+}
+
+// Health check response
+message HealthCheckResponse {
+  bool healthy = 1;
+  string status_message = 2;
+  map<string, string> diagnostics = 3;
+}
+
+// Message for bidirectional streaming
+message InteractionMessage {
+  string message_id = 1;
+  string sender_id = 2;
+  string recipient_id = 3;
+  string conversation_id = 4;
+  bytes content = 5;  // JSON serialized content
+  string content_type = 6; // e.g., "text", "json", "binary"
+  map<string, string> metadata = 7;
+  int64 timestamp = 8;  // Unix timestamp in milliseconds
+  string auth_token = 9;
+}

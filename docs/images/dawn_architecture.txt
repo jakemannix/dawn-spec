@@ -1,0 +1,31 @@
++-------------------------------------+
+|        DAWN Architecture           |
++-------------------------------------+
+
++----------------+        +----------------+
+|                |        |                |
+| Principal Agent|<------>| Gateway Agent  |
+|                |        |                |
++----------------+        +----------------+
+        ^                        ^
+        |                        |
+        v                        v
++----------------+        +----------------+
+|                |        |                |
+| GitHub Agent   |        | Web Search     |
+|                |        | Agent          |
++----------------+        +----------------+
+        ^                        ^
+        |                        |
+        v                        v
++----------------+        +----------------+
+|                |        |                |
+| arXiv Agent    |        | Other          |
+|                |        | Specialized    |
++----------------+        | Agents         |
+                          +----------------+
+
+- Principal Agent: Orchestrates tasks, makes decisions
+- Gateway Agent: Handles discovery and registration
+- Specialized Agents: Perform specific tasks (GitHub, arXiv, Web Search)
+- All communicate via standardized protocols (ACP/AGP)
