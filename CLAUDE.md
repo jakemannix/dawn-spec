@@ -11,6 +11,53 @@ This repository contains an experimental implementation of the DAWN architecture
 3. Open Agent Schema Framework (OASF) - Standardized data model for describing agent capabilities
 4. DAWN architecture - Implementation of Principal and Gateway Agents for distributed collaboration
 
+## NEW: A2A + MCP + OASF Interoperability (Phase 1)
+
+As of the latest release, this repository includes a comprehensive interoperability prototype that integrates:
+
+1. **A2A (Agent-to-Agent) Protocol** - Google's official A2A SDK for peer-to-peer agent communication
+2. **MCP (Model Context Protocol)** - Anthropic's official MCP SDK for centralized tool-based agent interactions  
+3. **Enhanced OASF** - Strongly-typed business logic schemas with JSON Schema validation
+
+### Dual Communication Paradigms
+
+The implementation supports two distinct multi-agent interaction patterns:
+
+#### 1. Peer-to-Peer (A2A Protocol)
+- Both agents maintain independent planning and reasoning
+- Agents delegate tasks to each other while preserving autonomy
+- Uses Google's official `a2a-sdk` for standardized communication
+
+#### 2. Centralized Intelligence (MCP Protocol)  
+- One agent uses another's capabilities as discoverable tools
+- Planning remains centralized while execution is distributed
+- Uses Anthropic's official `mcp` SDK for tool discovery and invocation
+
+### Quick Start - Interoperability Features
+
+**Test A2A peer-to-peer communication:**
+```bash
+# Terminal 1: Start A2A server
+uv run python examples/a2a_interop_demo.py
+
+# Terminal 2: Run A2A client workflow
+uv run python examples/a2a_interop_demo.py client
+```
+
+**Test MCP centralized intelligence:**
+```bash
+# Terminal 1: Start MCP server
+uv run python examples/mcp_interop_demo.py
+
+# Terminal 2: Run MCP client workflow  
+uv run python examples/mcp_interop_demo.py client
+```
+
+**Test schema validation:**
+```bash
+uv run python -c "from src.schemas import schema_validator; print([s['schema_type'] for s in schema_validator.list_available_schemas()])"
+```
+
 ## Core Interfaces
 
 The following interfaces define the key components of our implementation:
@@ -211,23 +258,30 @@ dawn-spec/
 
 ## Implementation Phases
 
-1. **Phase 1** (Current): Basic agent framework with ACP implementation
+1. **Phase 1** (Completed): Basic agent framework with ACP implementation
    - Agent, Capability, and Message classes
    - Registry for agent discovery (Gateway Agent functionality)
    - REST API server implementation for ACP
 
-2. **Phase 2** (Planned): DAWN Architecture Components
+2. **Phase 1.5** (Completed): A2A + MCP + OASF Interoperability Prototype
+   - **A2A Integration**: Google's official `a2a-sdk` for peer-to-peer agent communication
+   - **MCP Integration**: Anthropic's official `mcp` SDK for centralized tool-based interactions
+   - **Enhanced OASF**: Strongly-typed business logic schemas with JSON validation
+   - **Dual Paradigms**: Support for both peer-to-peer and centralized intelligence patterns
+   - **Production-Ready**: Built on official SDKs with comprehensive demos and testing
+
+3. **Phase 2** (Planned): DAWN Architecture Components
    - Principal Agent implementation with planning capabilities
    - Gateway Agent with full resource registry
    - Context management for maintaining task state
    - Implementation of DAWN's architectural layers
 
-3. **Phase 3** (Planned): AGP implementation
+4. **Phase 3** (Planned): AGP implementation
    - gRPC-based communication
    - Support for various message patterns
    - Security features
 
-4. **Phase 4** (Future): Advanced features
+5. **Phase 4** (Future): Advanced features
    - Agent orchestration with ReAct-based reasoning
    - Complex workflows across distributed agents
    - Security, safety, and compliance mechanisms

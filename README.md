@@ -19,6 +19,71 @@ Key features:
 - Capability-based invocation
 - Command-line interface (CLI) for easy interaction
 
+## 🚀 NEW: A2A + MCP + OASF Interoperability Prototype
+
+This repository now includes a comprehensive interoperability layer that bridges multiple agent communication protocols:
+
+### Dual Communication Paradigms
+
+#### 🤝 **A2A (Agent-to-Agent)** - Peer-to-Peer Communication
+- Agents maintain independent planning and reasoning
+- Built with Google's official `a2a-sdk`
+- Enables true multi-agent collaboration where both agents are intelligent
+
+#### 🔧 **MCP (Model Context Protocol)** - Centralized Intelligence
+- One agent uses others as discoverable tools
+- Built with Anthropic's official `mcp` SDK
+- Enables tool-based agent composition with centralized planning
+
+#### 📋 **Enhanced OASF** - Strongly-Typed Business Logic
+- JSON Schema validation for all payloads
+- Pre-built schemas: OrderProcessing, DataAnalysis, DocumentProcessing, ResearchQuery
+- Safe payload evolution and comprehensive error reporting
+
+### 🎯 Quick Start - Try the Interoperability Features
+
+**A2A Peer-to-Peer Demo:**
+```bash
+# Terminal 1: Start text processing agent as A2A server
+uv run python examples/a2a_interop_demo.py
+
+# Terminal 2: Run reasoning agent that delegates to the first agent
+uv run python examples/a2a_interop_demo.py client
+```
+
+**MCP Centralized Intelligence Demo:**
+```bash
+# Terminal 1: Start analytics agent as MCP server
+uv run python examples/mcp_interop_demo.py
+
+# Terminal 2: Run orchestrator that uses analytics as tools
+uv run python examples/mcp_interop_demo.py client
+```
+
+**Schema Validation:**
+```bash
+# List available business logic schemas
+uv run python -c "from src.schemas import schema_validator; print([s['schema_type'] for s in schema_validator.list_available_schemas()])"
+
+# Test order processing schema validation
+uv run python -c "from src.schemas import schema_validator; print(schema_validator.validate_payload('order_processing', {'order_id': 'ORD-ABC12345', 'customer_id': 'CUST-XYZ67890', 'customer_info': {'name': 'Test', 'email': 'test@example.com'}, 'items': [{'product_id': 'PROD-DEF11111', 'product_name': 'Widget', 'quantity': 1, 'unit_price': 10.0, 'total_price': 10.0}], 'total_amount': 10.0, 'currency': 'USD', 'order_status': 'pending'}))"
+```
+
+**Create Interop-Capable Agents:**
+```bash
+# Create an agent that supports both A2A and MCP protocols
+uv run python -c "
+from src.agent import MCPCapableAgent, Capability
+agent = MCPCapableAgent('InteropAgent', 'Supports both A2A and MCP')
+cap = Capability('test', 'Test Capability', 'A test capability', business_logic_schema='data_analysis')
+agent.add_capability(cap)
+print(f'Agent: {agent.name}')
+print(f'A2A capable: {hasattr(agent, \"start_a2a_server\")}')
+print(f'MCP capable: {hasattr(agent, \"start_mcp_server\")}')
+print(f'Schema validation: {cap.business_logic_schema}')
+"
+```
+
 ## Architecture
 
 The DAWN architecture follows this structure:
@@ -91,7 +156,7 @@ The implementation follows these core principles:
 
 ### Prerequisites
 
-- Python 3.9+ with pip or [uv](https://github.com/astral-sh/uv)
+- Python 3.10+ with pip or [uv](https://github.com/astral-sh/uv) (updated for A2A/MCP compatibility)
 - API keys for the services you want to use (OpenAI, Anthropic, Google Gemini)
 
 ### Setup with uv (Recommended)
@@ -111,11 +176,11 @@ source .venv/bin/activate
 # On Windows:
 # .venv\Scripts\activate
 
-# Install dependencies
-uv pip install -r requirements.txt
+# Install dependencies (core + interoperability)
+uv sync --extra interop
 
-# Install the project in development mode
-uv pip install -e .
+# Or install only core dependencies
+uv sync
 
 # Set up environment variables
 cp template.env .env
@@ -136,10 +201,10 @@ source .venv/bin/activate
 # On Windows:
 # .venv\Scripts\activate
 
-# Install dependencies
-pip install -r requirements.txt
+# Install dependencies with interoperability features
+pip install -e ".[interop]"
 
-# Install the project in development mode
+# Or install only core dependencies
 pip install -e .
 ```
 
