@@ -1,1 +1,3 @@
-"""Tests for the DAWN specification implementation."""
+"""
+Dawn Specification tests package.
+"""

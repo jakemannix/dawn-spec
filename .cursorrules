@@ -1,0 +1,10 @@
+# Cursor AI Assistant Rules for dawn-spec
+
+## Instructions
+Please refer to `CLAUDE.md` for comprehensive development environment setup, coding conventions, architecture overview, and project guidelines.
+
+Key points:
+- Always use `uv run python ...` when running Python scripts/tests
+- Add dependencies to `pyproject.toml`, not separate requirements files
+- Follow the three-layer agent architecture (A2A Skills, OASF Capabilities, MCP Tools)
+- Use absolute imports from `src/` package 

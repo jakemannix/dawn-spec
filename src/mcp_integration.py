@@ -14,8 +14,100 @@ from mcp.types import Tool as MCPTool, Resource
 from mcp import ClientSession, StdioServerParameters
 from mcp.client.stdio import stdio_client
 from src.interfaces import IAgent
+from abc import ABC, abstractmethod
 
 logger = logging.getLogger(__name__)
+
+
+class MCPTool(ABC):
+    """Abstract base class for MCP tools"""
+    
+    def __init__(self, name: str, description: str = ""):
+        self.name = name
+        self.description = description
+        self.logger = logging.getLogger(f"MCPTool.{name}")
+    
+    @abstractmethod
+    async def call(self, arguments: Dict[str, Any]) -> Any:
+        """Execute the tool with given arguments"""
+        pass
+    
+    def __str__(self) -> str:
+        return f"MCPTool({self.name})"
+    
+    def __repr__(self) -> str:
+        return f"MCPTool(name='{self.name}', description='{self.description}')"
+
+
+class MCPToolRegistry:
+    """Registry for managing MCP tools"""
+    
+    def __init__(self):
+        self._tools: Dict[str, MCPTool] = {}
+        self.logger = logging.getLogger("MCPToolRegistry")
+    
+    def register_tool(self, tool: MCPTool) -> None:
+        """Register an MCP tool"""
+        self._tools[tool.name] = tool
+        self.logger.info(f"Registered MCP tool: {tool.name}")
+    
+    def unregister_tool(self, name: str) -> Optional[MCPTool]:
+        """Unregister an MCP tool"""
+        tool = self._tools.pop(name, None)
+        if tool:
+            self.logger.info(f"Unregistered MCP tool: {name}")
+        return tool
+    
+    def get_tool(self, name: str) -> Optional[MCPTool]:
+        """Get an MCP tool by name"""
+        return self._tools.get(name)
+    
+    def get_all_tools(self) -> List[MCPTool]:
+        """Get list of all registered tools"""
+        return list(self._tools.values())
+    
+    def list_tool_names(self) -> List[str]:
+        """Get list of all tool names"""
+        return list(self._tools.keys())
+    
+    def clear(self) -> None:
+        """Clear all registered tools"""
+        self._tools.clear()
+        self.logger.info("Cleared all MCP tools")
+
+
+# Example/Mock MCP tools for testing
+class MockMCPTool(MCPTool):
+    """Mock MCP tool for testing purposes"""
+    
+    def __init__(self, name: str, description: str = "", mock_response: Any = "Mock response"):
+        super().__init__(name, description)
+        self.mock_response = mock_response
+    
+    async def call(self, arguments: Dict[str, Any]) -> Any:
+        """Return mock response"""
+        self.logger.info(f"Mock call to {self.name} with args: {arguments}")
+        return self.mock_response
+
+
+class EchoMCPTool(MCPTool):
+    """Echo MCP tool that returns the input arguments"""
+    
+    def __init__(self):
+        super().__init__("echo", "Echo tool that returns input arguments")
+    
+    async def call(self, arguments: Dict[str, Any]) -> Any:
+        """Echo back the input arguments"""
+        return f"Echo: {arguments}"
+
+
+# Default registry instance
+default_registry = MCPToolRegistry()
+
+
+def get_default_registry() -> MCPToolRegistry:
+    """Get the default MCP tool registry"""
+    return default_registry
 
 
 class DawnMCPServer:

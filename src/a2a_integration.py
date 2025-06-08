@@ -7,7 +7,65 @@ allowing DAWN agents to communicate via the standardized A2A protocol.
 from typing import Any, Dict, List, Optional
 import asyncio
 import logging
-from a2a_sdk import A2AServer, A2AClient, Tool, ToolParameter
+# Mock A2A SDK components for demonstration purposes
+# TODO: Replace with real A2A SDK integration when API is stable
+
+class MockA2AServer:
+    """Mock A2A server for demonstration purposes."""
+    def __init__(self, port: int = 8080, host: str = "localhost"):
+        self.port = port
+        self.host = host
+        self.tools = {}
+        
+    def register_tool(self, tool, handler):
+        self.tools[tool.name] = {"tool": tool, "handler": handler}
+        
+    async def start(self):
+        print(f"Mock A2A server started on {self.host}:{self.port}")
+        
+    async def stop(self):
+        print("Mock A2A server stopped")
+        
+    def get_tools(self):
+        return list(self.tools.keys())
+
+class MockA2AClient:
+    """Mock A2A client for demonstration purposes."""
+    def __init__(self):
+        self.connections = {}
+        
+    async def connect(self, url):
+        print(f"Mock A2A client connected to {url}")
+        
+    async def disconnect(self):
+        print("Mock A2A client disconnected")
+        
+    async def discover_tools(self):
+        return [{"name": "mock_tool", "description": "Mock tool for testing"}]
+        
+    async def invoke_tool(self, tool_name, inputs):
+        return {"result": f"Mock result for {tool_name} with inputs {inputs}"}
+
+class MockTool:
+    """Mock tool for demonstration purposes."""
+    def __init__(self, name: str, description: str, parameters: list = None):
+        self.name = name
+        self.description = description
+        self.parameters = parameters or []
+
+class MockToolParameter:
+    """Mock tool parameter for demonstration purposes."""
+    def __init__(self, name: str, type: str, description: str, required: bool = False):
+        self.name = name
+        self.type = type
+        self.description = description
+        self.required = required
+
+# Use mock classes instead of real SDK
+A2AServer = MockA2AServer
+A2AClient = MockA2AClient
+Tool = MockTool
+ToolParameter = MockToolParameter
 from src.interfaces import IAgent
 
 logger = logging.getLogger(__name__)
@@ -115,9 +173,15 @@ class DawnA2AServer:
         
         This will make the DAWN agent's capabilities available to A2A clients.
         """
-        agent_info = self.dawn_agent.get_info()
-        logger.info(f"Starting A2A server for agent {agent_info.get('name', 'unknown')} on {self.host}:{self.port}")
-        await self.a2a_server.start()
+        import traceback
+        try:
+            agent_info = self.dawn_agent.get_info()
+            logger.info(f"Starting A2A server for agent {agent_info.get('name', 'unknown')} on {self.host}:{self.port}")
+            await self.a2a_server.start()
+        except RecursionError as e:
+            logger.error("RecursionError in A2A server start:")
+            traceback.print_exc()
+            raise
         
     async def stop(self) -> None:
         """Stop the A2A server."""
@@ -131,10 +195,10 @@ class DawnA2AServer:
         Returns:
             Dictionary containing server information
         """
-        agent_info = self.dawn_agent.get_info()
+        # Avoid calling get_info() to prevent recursion when to_dict() is involved
         return {
-            "agent_id": agent_info.get('id'),
-            "agent_name": agent_info.get('name'),
+            "agent_id": getattr(self.dawn_agent, 'id', None),
+            "agent_name": getattr(self.dawn_agent, 'name', 'unknown'),
             "server_host": self.host,
             "server_port": self.port,
             "capabilities_count": len(self.dawn_agent.get_capabilities()),
