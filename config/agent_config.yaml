@@ -1,0 +1,199 @@
+# Agent Configuration
+# This file configures the pluggable agent system
+
+# Default active implementation
+default_implementation: "text_matching"  # Options: text_matching, langgraph, openai_sdk, custom
+
+# Implementation-specific configurations
+implementations:
+  
+  # Text-matching implementation (original behavior)
+  text_matching:
+    enabled: true
+    intent_patterns:
+      github_search:
+        - "search\\s+github"
+        - "@github"
+      arxiv_search:
+        - "search\\s+arxiv"
+        - "@arxiv"
+      synthesis:
+        - "synthesize"
+        - "@synthesis"
+      help:
+        - "^help$"
+        - "what\\s+can\\s+you\\s+do"
+    
+    default_responses:
+      greeting: "Hello! I can help you search GitHub repositories, arXiv papers, and synthesize research. What would you like to do?"
+      goodbye: "Goodbye! Feel free to ask if you need help with research later."
+      error: "I encountered an error processing your request. Please try again or ask for help."
+
+  # LangGraph implementation (LLM-powered)
+  langgraph:
+    enabled: true
+    
+    # LLM Configuration
+    llm:
+      provider: "openai"  # Options: openai, anthropic (can use PRINCIPAL_AGENT_TYPE env var)
+      model: "gpt-4"      # Can be overridden by DEFAULT_MODEL env var
+      temperature: 0.7    # Can be overridden by TEMPERATURE env var
+      max_tokens: 1000    # Can be overridden by MAX_TOKENS env var
+      api_key: null       # Set via environment variable OPENAI_API_KEY or ANTHROPIC_API_KEY
+    
+    # Graph Configuration
+    graph:
+      type: "react"  # Options: react, coala
+      
+      # ReACT-specific settings
+      react:
+        max_iterations: 10
+        enable_memory: true
+        reflection_enabled: false
+      
+      # CoALA-specific settings  
+      coala:
+        perception_depth: "deep"  # Options: shallow, deep
+        planning_strategy: "sequential"  # Options: sequential, parallel
+        reflection_enabled: true
+        memory_enabled: true
+    
+    # Tool integration settings
+    tools:
+      mcp_integration: true
+      a2a_integration: true
+      tool_timeout: 30  # seconds
+      max_concurrent_tools: 3
+    
+    # Prompt templates
+    prompts:
+      system: |
+        You are a helpful research assistant with access to GitHub and arXiv search tools.
+        You can also synthesize research findings and provide comprehensive answers.
+        Always use the available tools when they can help answer user questions.
+      
+      perception: |
+        Analyze the user's request and identify:
+        1. The main intent
+        2. Required information  
+        3. Available tools/skills that might help
+        4. Potential challenges
+      
+      planning: |
+        Based on the perception analysis, create a step-by-step plan to fulfill the user's request.
+        Be specific about which tools to use and in what order.
+      
+      reflection: |
+        Reflect on the results of your actions:
+        1. Was the user's request fulfilled?
+        2. What worked well?
+        3. What could be improved?
+        4. Provide a final response to the user.
+
+  # OpenAI SDK implementation (future)
+  openai_sdk:
+    enabled: false
+    api_key: null
+    model: "gpt-4"
+    assistant_id: null
+    
+  # Custom implementation placeholder
+  custom:
+    enabled: false
+    module_path: "src.implementations.custom_agent"
+    class_name: "CustomAgent"
+    config: {}
+
+# Global agent settings
+global:
+  # Logging configuration
+  logging:
+    level: "INFO"  # DEBUG, INFO, WARNING, ERROR
+    format: "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+    file: "logs/agent.log"
+  
+  # Session management
+  sessions:
+    default_timeout: 3600  # 1 hour in seconds
+    max_history_length: 100
+    enable_persistence: false
+    storage_backend: "memory"  # Options: memory, redis, file
+  
+  # Performance settings
+  performance:
+    max_concurrent_requests: 10
+    request_timeout: 60  # seconds
+    enable_caching: true
+    cache_ttl: 300  # 5 minutes
+  
+  # Health monitoring
+  health:
+    enable_health_checks: true
+    check_interval: 30  # seconds
+    failure_threshold: 3
+
+# MCP Tool Registry Settings
+mcp:
+  tools:
+    github_search:
+      enabled: true
+      description: "Search GitHub repositories"
+      timeout: 15
+    arxiv_search:
+      enabled: true 
+      description: "Search arXiv papers"
+      timeout: 20
+    synthesis_tool:
+      enabled: true
+      description: "Synthesize research findings"
+      timeout: 30
+
+# A2A Skills Registry Settings
+a2a:
+  skills:
+    "research.github.search.github_search":
+      enabled: true
+      description: "GitHub repository search skill"
+      endpoint: "http://localhost:8081/a2a"
+    "research.arxiv.search.arxiv_search":
+      enabled: true
+      description: "arXiv paper search skill" 
+      endpoint: "http://localhost:8082/a2a"
+    "research.synthesis.synthesize":
+      enabled: true
+      description: "Research synthesis skill"
+      endpoint: "http://localhost:8083/a2a"
+
+# Environment-specific overrides
+environments:
+  development:
+    global:
+      logging:
+        level: "DEBUG"
+    implementations:
+      langgraph:
+        graph:
+          type: "react"  # Use simpler ReACT for development
+        llm:
+          model: "gpt-3.5-turbo"  # Cheaper model for dev
+  
+  production:
+    global:
+      logging:
+        level: "WARNING"
+      performance:
+        max_concurrent_requests: 50
+    implementations:
+      langgraph:
+        llm:
+          model: "gpt-4"
+        graph:
+          type: "coala"  # Full CoALA for production
+
+  testing:
+    default_implementation: "text_matching"  # Use text matching for tests
+    global:
+      logging:
+        level: "ERROR"
+      sessions:
+        default_timeout: 60  # Short timeout for tests 

@@ -1,0 +1,53 @@
+llm:
+  # Primary LLM provider for intent detection and parameter extraction
+  provider: "openai"  # Options: openai, anthropic, azure, local
+  
+  openai:
+    model: "gpt-4"  # or gpt-3.5-turbo for faster/cheaper
+    api_key_env: "OPENAI_API_KEY"  # Environment variable name
+    max_tokens: 500
+    temperature: 0.1  # Low temperature for consistent intent detection
+    
+  anthropic:
+    model: "claude-3-sonnet-20240229"
+    api_key_env: "ANTHROPIC_API_KEY"
+    max_tokens: 500
+    temperature: 0.1
+    
+  azure:
+    endpoint: ""  # Azure OpenAI endpoint
+    api_key_env: "AZURE_OPENAI_API_KEY"
+    deployment_name: ""
+    api_version: "2023-12-01-preview"
+    
+  local:
+    endpoint: "http://localhost:11434"  # Ollama default
+    model: "llama2"
+
+agent_behavior:
+  # How agents should handle LLM responses
+  max_retries: 3
+  timeout_seconds: 30
+  fallback_to_string_matching: true  # If LLM fails, use simple string matching
+  
+  # Intent detection prompting
+  intent_detection:
+    system_prompt: |
+      You are an intent classification system for a specialized agent. 
+      Analyze the user's message and determine which capability they want to invoke.
+      Always respond with a JSON object containing:
+      - "capability_id": the exact capability ID to invoke
+      - "parameters": extracted parameters as key-value pairs
+      - "confidence": confidence score 0-1
+      - "reasoning": brief explanation
+      
+  parameter_extraction:
+    system_prompt: |
+      You are a parameter extraction system. Given a user message and a capability schema,
+      extract the required parameters from the user's natural language.
+      Respond with JSON containing the extracted parameters.
+
+logging:
+  level: "INFO"
+  log_llm_requests: true
+  log_llm_responses: false  # Set to true for debugging (may contain sensitive data) 

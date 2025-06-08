@@ -1,0 +1,22 @@
+# Optional LangGraph dependencies
+# Install with: pip install -r requirements-langgraph.txt
+
+# Core LangGraph dependencies
+langgraph>=0.0.40
+langchain-core>=0.1.45
+langchain-community>=0.0.30
+
+# LLM providers (choose one or more)
+langchain-openai>=0.1.0        # For OpenAI GPT models
+langchain-anthropic>=0.1.0     # For Anthropic Claude models
+
+# Additional useful packages
+langsmith>=0.0.50              # For LangSmith tracing/monitoring
+typing-extensions>=4.5.0       # For enhanced type hints
+
+# YAML configuration support (if not already installed)
+PyYAML>=6.0
+
+# Development/debugging tools (optional)
+langchain-experimental>=0.0.50  # Experimental features
+graphviz>=0.20.0               # For graph visualization 

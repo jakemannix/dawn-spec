@@ -1,0 +1,50 @@
+{
+  "$schema": "https://google.github.io/A2A/schemas/agent-card-v0.2.json",
+  "oasfSchema": "https://raw.githubusercontent.com/agntcy/oasf/v0.2/schema/agent-manifest.schema.json",
+
+  /* ------------ A2A header ------------ */
+  "name": "acme.finance.pay-agent",
+  "version": "1.4.0",
+  "url": "https://pay.acme.com/a2a",
+  "authentication": [{ "scheme": "OAuth2", "tokenUrl": "https://id.acme.com/tok" }],
+
+  /* ------------ Skills list ------------ */
+  "skills": [
+    {
+      "name": "invoice.pay",
+      "summary": "Execute SAP payment",
+      "contentTypes": ["application/json"],
+      "requiredScopes": ["FIN_PAY"],
+      "schemaRefs": {
+        "input":  "urn:oasf:invoice.pay#PayInput",
+        "output": "urn:oasf:invoice.pay#PayResult"
+      },
+
+      /* ---------- MCP linkage ---------- */
+      "mcpTool": {
+        "tool": {
+          "name": "invoice_pay",
+          "description": "Pay an invoice that has been pre‑approved.",
+          "parameters": { "$ref": "urn:oasf:invoice.pay#PayInput" },
+          "returns":    { "$ref": "urn:oasf:invoice.pay#PayResult" }
+        },
+        "invoke": {
+          "kind":  "local",        // could be "a2a" if delegated
+          "command": "python pay.py"
+        }
+      }
+    }
+  ],
+
+  /* ------------ OASF capability tags ------------ */
+  "oasf": { "capabilities": ["finance.payment"] },
+
+  /* ------------ Strong typing ------------ */
+  "$defs": {
+    "PayInput":  { "$id": "urn:oasf:invoice.pay#PayInput",  "type":"object", … },
+    "PayResult": { "$id": "urn:oasf:invoice.pay#PayResult", "type":"object", … }
+  },
+
+  /* JWS signature */ "signature": "eyJhbGciOiJFUzI1NiIsInR5cCI6IkpXVCJ9.…"
+}
+

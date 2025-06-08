@@ -1,27 +1,284 @@
-# DAWN Architecture Implementation
+# DAWN-Spec: Multi-Agent LangGraph Research System
+
+🤖 **Interactive multi-agent research system** powered by LangGraph with real LLM integration, supporting multiple AI agent protocols and providing a natural language CLI for GitHub and arXiv research.
+
+## 🚀 Features
+
+### Interactive Multi-Agent CLI
+- **Natural language interface**: Chat with specialized research agents using `@github` and `@arxiv` commands
+- **Real LLM integration**: Powered by LangGraph with multi-LLM fallback (OpenAI → Anthropic → Google Gemini)
+- **Intelligent synthesis**: Dedicated synthesis agent that combines research findings from multiple sources
+- **Context-aware**: Agents maintain conversation context and reasoning traces
+
+### Multi-Protocol Agent Support
+- **A2A (Agent-to-Agent)**: Peer-to-peer communication using Google's official A2A SDK
+- **ACP (Agent Connect Protocol)**: AGNTCY framework REST-based agent interaction
+- **MCP (Model Context Protocol)**: Anthropic's tool-based agent composition
+- **OASF**: Strongly-typed business logic with JSON Schema validation
+
+### Real API Integrations
+- **GitHub Research**: Search repositories, fetch source code, analyze codebases using GitHub API
+- **arXiv Research**: Search academic papers, download PDFs, extract research insights using arXiv API
+- **Unified Agent Discovery**: Standardized agent cards compatible with all protocols at `/.well-known/agent.json`
+
+## 🎯 Quick Start
+
+### Interactive Research Session
+
+```bash
+# Install dependencies
+uv sync --extra langgraph
+
+# Set up your API keys
+cp template.env .env
+# Edit .env with your OpenAI/Anthropic/Google API keys
+
+# Start the interactive LangGraph research system
+uv run python examples/a2a_langgraph_demo.py
+
+# Example interaction:
+💭 You: @github search for langchain repositories with good documentation
+🤖 GitHub Agent: Found 3 highly-rated repositories...
+
+💭 You: @arxiv find papers about retrieval augmented generation from 2024
+🤖 arXiv Agent: Retrieved 5 recent papers on RAG...
+
+💭 You: synthesize findings about langchain and RAG integration
+🤖 Synthesis Agent: Based on the GitHub repositories and academic papers...
+```
+
+### Agent Architecture
+
+The system includes three specialized LangGraph agents:
+
+- **🔍 GitHub Agent**: Repository search, file analysis, codebase exploration
+- **📚 arXiv Agent**: Academic paper search, research trend analysis  
+- **🧠 Synthesis Agent**: Cross-source research synthesis and insight generation
+
+Each agent uses:
+- **LangGraph ReACT patterns** for structured reasoning
+- **Real API integrations** (not mocks) with comprehensive error handling
+- **Multi-LLM fallback** ensuring reliability across different providers
+- **Context management** for maintaining conversation flow
+
+### Protocol Integration
+
+```bash
+# Test multi-protocol agent discovery
+uv run python -c "
+from examples.agents import LangGraphGitHubAgent
+agent = LangGraphGitHubAgent('github-research')
+print('Agent protocols:', agent.get_supported_protocols())
+print('Agent card:', agent.generate_agent_card()['capabilities'])
+"
+
+# Run A2A peer-to-peer demo
+uv run python examples/a2a_interop_demo.py
+
+# Run MCP centralized intelligence demo  
+uv run python examples/mcp_interop_demo.py
+```
+
+## 🏗️ Architecture Overview
+
+### LangGraph Multi-Agent System
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│                    Interactive CLI                          │
+│              Natural Language Interface                     │
+└─────────────────┬───────────────────────────────────────────┘
+                  │
+    ┌─────────────┼─────────────┐
+    │             │             │
+┌───▼───┐    ┌────▼────┐   ┌────▼────┐
+│GitHub │    │  arXiv  │   │Synthesis│
+│Agent  │    │ Agent   │   │ Agent   │
+└───┬───┘    └────┬────┘   └────┬────┘
+    │             │             │
+┌───▼───┐    ┌────▼────┐   ┌────▼────┐
+│GitHub │    │  arXiv  │   │Context  │
+│API    │    │   API   │   │Manager  │
+└───────┘    └─────────┘   └─────────┘
+```
+
+### Multi-Protocol Support
+
+Each agent supports multiple communication protocols:
+
+- **A2A**: Peer-to-peer agent communication
+- **ACP**: AGNTCY framework REST endpoints  
+- **MCP**: Tool-based composition with centralized planning
+- **OASF**: Schema validation and business logic typing
+
+### Three-Layer Agent Framework
+
+1. **🔧 MCP Tools**: LLM-integrated tools for local interaction
+2. **🏷️ OASF Capabilities**: Schema validation and semantic tagging
+3. **📡 A2A Skills**: Network-callable functions for distributed systems
+
+## 📋 Prerequisites
+
+- Python 3.10+ with [uv](https://github.com/astral-sh/uv) (recommended) or pip
+- API keys for at least one LLM provider:
+  - OpenAI API key (recommended)
+  - Anthropic API key (Claude)
+  - Google Gemini API key
+- Optional: GitHub token for enhanced API limits
+
+## 🔧 Installation
+
+### Using uv (Recommended)
+
+```bash
+# Install uv if you don't have it
+pip install uv
+
+# Clone and setup
+git clone <repository-url>
+cd dawn-spec
+uv venv
+source .venv/bin/activate  # Linux/macOS
+# .venv\Scripts\activate   # Windows
+
+# Install with LangGraph support
+uv sync --extra langgraph
+
+# Configure environment
+cp template.env .env
+# Edit .env with your API keys
+```
+
+### Environment Configuration
+
+Edit `.env` with your API keys:
+
+```env
+# At least one LLM provider (OpenAI recommended)
+OPENAI_API_KEY=sk-your-openai-key
+ANTHROPIC_API_KEY=sk-ant-your-anthropic-key
+GEMINI_API_KEY=AIza-your-gemini-key
+
+# Optional: GitHub token for better API limits
+GITHUB_TOKEN=ghp_your-github-token
+```
+
+## 🎮 Usage Examples
+
+### Interactive Research Workflow
+
+```bash
+# Start the LangGraph research system
+uv run python examples/a2a_langgraph_demo.py
+
+# Research workflow examples:
+You: @github find python libraries for document processing
+You: @arxiv search for papers about document AI from 2024  
+You: synthesize the state of document processing technology
+
+# Agent switching:
+You: @switch github    # Switch to GitHub-only mode
+You: @switch arxiv     # Switch to arXiv-only mode  
+You: @switch synthesis # Switch to synthesis-only mode
+You: @switch all       # Enable all agents (default)
+```
+
+### Programmatic Agent Usage
+
+```python
+from examples.agents import LangGraphGitHubAgent
+import asyncio
+
+async def research_example():
+    # Initialize GitHub research agent
+    agent = LangGraphGitHubAgent("github-research")
+    
+    # Search for repositories
+    result = await agent.process_request(
+        "Find popular Python machine learning libraries"
+    )
+    
+    print(f"Found: {result.response_text}")
+    print(f"Reasoning: {result.reasoning_trace}")
+
+asyncio.run(research_example())
+```
+
+### Multi-Protocol Demonstration
+
+```bash
+# A2A peer-to-peer agents
+uv run python examples/a2a_interop_demo.py
+
+# MCP tool-based composition
+uv run python examples/mcp_interop_demo.py
+
+# Schema validation testing
+uv run python -c "
+from src.schemas import schema_validator
+schemas = schema_validator.list_available_schemas()
+print('Available schemas:', [s['schema_type'] for s in schemas])
+"
+```
+
+## 📚 Examples and Demos
+
+- **`examples/a2a_langgraph_demo.py`**: Main interactive LangGraph research system
+- **`examples/agents/`**: Individual LangGraph agent implementations
+- **`examples/protocols/`**: Multi-protocol adapter implementations
+- **`examples/a2a_interop_demo.py`**: A2A peer-to-peer communication demo
+- **`examples/mcp_interop_demo.py`**: MCP centralized intelligence demo
+- **`examples/pluggable_agents_demo.py`**: Pluggable architecture demonstration
+
+## 🧪 Testing
+
+```bash
+# Run all tests
+uv run python -m pytest
+
+# Test specific agent functionality
+uv run python -m pytest tests/test_langgraph_agents.py
+
+# Test protocol integrations
+uv run python -m pytest tests/test_interop.py
+```
+
+## 🤝 Contributing
+
+1. Use `uv run python ...` for all Python commands
+2. Add dependencies to `pyproject.toml`, not requirements files
+3. Follow the three-layer architecture (A2A Skills, OASF Capabilities, MCP Tools)
+4. Use type hints and comprehensive error handling
+5. Test with multiple LLM providers when possible
+
+---
+
+## 🏛️ Technical Architecture Details
+
+### DAWN Architecture Implementation
 
 This repository contains a complete implementation of Cisco's "DAWN" (Distributed Agents in a Worldwide Network) specification for agent interaction and interoperability, following the AGNTCY framework protocols.
 
-## Overview
+#### DAWN Framework Overview
 
-The DAWN architecture provides a framework for building distributed agent systems where specialized agents can cooperate to solve complex tasks. This implementation demonstrates:
+The DAWN architecture provides a framework for building distributed agent systems where specialized agents can cooperate to solve complex tasks:
 
 - **Principal Agents**: Orchestration agents that decompose tasks and coordinate other agents
 - **Gateway Agents**: Agents that enable discovery and registration of other agents
 - **Specialized Agents**: Agents with specific capabilities (GitHub search, arXiv access, web search)
 - **Standardized Protocols**: Implementation of ACP (Agent Connect Protocol) and AGP (Agent Gateway Protocol)
 
-Key features:
+### A2A + MCP + OASF Interoperability Layer
 
-- Interface-based design for modularity and extensibility
-- Multiple LLM integrations (OpenAI, Anthropic Claude, Google Gemini)
-- Real API integrations (not just mock implementations)
-- Capability-based invocation
-- Command-line interface (CLI) for easy interaction
+The system includes a comprehensive interoperability layer that bridges multiple agent communication protocols:
 
-## Architecture
+#### Communication Paradigms
 
-The DAWN architecture follows this structure:
+- **🤝 A2A (Agent-to-Agent)**: Peer-to-peer communication with independent planning and reasoning
+- **🔧 MCP (Model Context Protocol)**: Centralized intelligence with tool-based composition  
+- **📋 Enhanced OASF**: Strongly-typed business logic with JSON Schema validation
+
+### Legacy DAWN Architecture Diagram
 
 ```
 +-------------------------------------+
@@ -51,14 +308,6 @@ The DAWN architecture follows this structure:
 +----------------+        | Agents         |
                           +----------------+
 ```
-
-The implementation follows these core principles:
-
-1. **Modularity**: All components implement standardized interfaces
-2. **Standardization**: Common message formats and protocols
-3. **Extensibility**: Easy to add new agent types and capabilities
-4. **Interoperability**: Agents can seamlessly work together
-5. **Discoverability**: Agents can discover and utilize capabilities of other agents
 
 ## Components
 
@@ -91,7 +340,7 @@ The implementation follows these core principles:
 
 ### Prerequisites
 
-- Python 3.9+ with pip or [uv](https://github.com/astral-sh/uv)
+- Python 3.10+ with pip or [uv](https://github.com/astral-sh/uv) (updated for A2A/MCP compatibility)
 - API keys for the services you want to use (OpenAI, Anthropic, Google Gemini)
 
 ### Setup with uv (Recommended)
@@ -111,11 +360,11 @@ source .venv/bin/activate
 # On Windows:
 # .venv\Scripts\activate
 
-# Install dependencies
-uv pip install -r requirements.txt
+# Install dependencies (core + interoperability)
+uv sync --extra interop
 
-# Install the project in development mode
-uv pip install -e .
+# Or install only core dependencies
+uv sync
 
 # Set up environment variables
 cp template.env .env
@@ -136,10 +385,10 @@ source .venv/bin/activate
 # On Windows:
 # .venv\Scripts\activate
 
-# Install dependencies
-pip install -r requirements.txt
+# Install dependencies with interoperability features
+pip install -e ".[interop]"
 
-# Install the project in development mode
+# Or install only core dependencies
 pip install -e .
 ```
 
